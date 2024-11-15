@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { Program, AnchorProvider, web3 } from "@project-serum/anchor";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
@@ -6,8 +6,12 @@ import axios from "axios";
 import idl from "./idl.json";
 import "./App.css";
 
+// Import the Buffer polyfill for the browser
+import { Buffer } from "buffer";
+window.Buffer = Buffer; // Make Buffer globally available
+
 const programId = new PublicKey("GhiqJjg8sVy9ETnzyRBZxvpRaLPYxR71q7vR2U3DYJj8"); // Replace with your program ID
-const network = clusterApiUrl("devnet"); 
+const network = clusterApiUrl("devnet");
 
 const MintNFT = () => {
   const [walletAddress, setWalletAddress] = useState(null);
@@ -18,10 +22,10 @@ const MintNFT = () => {
     image: null,
   });
   const [ipfsUrl, setIpfsUrl] = useState("");
-  const [mintedNft, setMintedNft] = useState(null); 
+  const [mintedNft, setMintedNft] = useState(null);
 
-  const IPFS_API_KEY = "b17cd3c4251fc21e47ed"; 
-  const IPFS_API_SECRET = "692b522e060586e1c025d5c209e3d2cc503a00f34b1e0b2f1e6eb7386a069d13"; 
+  const IPFS_API_KEY = "b17cd3c4251fc21e47ed";
+  const IPFS_API_SECRET = "692b522e060586e1c025d5c209e3d2cc503a00f34b1e0b2f1e6eb7386a069d13";
 
   // Connect Phantom Wallet
   const connectWallet = async () => {
@@ -30,6 +34,7 @@ const MintNFT = () => {
       try {
         const response = await solana.connect();
         console.log("Wallet connected:", response.publicKey.toString());
+        localStorage.setItem("walletAddress", response.publicKey.toString()); // Store wallet address in localStorage
         setWalletAddress(response.publicKey.toString());
       } catch (err) {
         console.error("Error connecting wallet:", err);
@@ -38,6 +43,14 @@ const MintNFT = () => {
       alert("Please install the Phantom Wallet extension!");
     }
   };
+
+  // Restore wallet address from localStorage when component mounts
+  useEffect(() => {
+    const storedWalletAddress = localStorage.getItem("walletAddress");
+    if (storedWalletAddress) {
+      setWalletAddress(storedWalletAddress);
+    }
+  }, []);
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -72,6 +85,7 @@ const MintNFT = () => {
       throw error;
     }
   };
+
   const mintNft = async () => {
     const { name, price, image } = nftDetails;
 
