@@ -6,11 +6,10 @@ import axios from "axios";
 import idl from "./idl.json";
 import "./App.css";
 
-// Import the Buffer polyfill for the browser
 import { Buffer } from "buffer";
-window.Buffer = Buffer; // Make Buffer globally available
+window.Buffer = Buffer;
 
-const programId = new PublicKey("GhiqJjg8sVy9ETnzyRBZxvpRaLPYxR71q7vR2U3DYJj8"); // Replace with your program ID
+const programId = new PublicKey("GhiqJjg8sVy9ETnzyRBZxvpRaLPYxR71q7vR2U3DYJj8"); 
 const network = clusterApiUrl("devnet");
 
 const MintNFT = () => {
@@ -34,7 +33,7 @@ const MintNFT = () => {
       try {
         const response = await solana.connect();
         console.log("Wallet connected:", response.publicKey.toString());
-        localStorage.setItem("walletAddress", response.publicKey.toString()); // Store wallet address in localStorage
+        localStorage.setItem("walletAddress", response.publicKey.toString()); 
         setWalletAddress(response.publicKey.toString());
       } catch (err) {
         console.error("Error connecting wallet:", err);
@@ -44,7 +43,13 @@ const MintNFT = () => {
     }
   };
 
-  // Restore wallet address from localStorage when component mounts
+  // Disconnect Phantom Wallet
+  const disconnectWallet = () => {
+    setWalletAddress(null);
+    localStorage.removeItem("walletAddress");
+    alert("Wallet disconnected.");
+  };
+  
   useEffect(() => {
     const storedWalletAddress = localStorage.getItem("walletAddress");
     if (storedWalletAddress) {
@@ -117,8 +122,8 @@ const MintNFT = () => {
       );
       const program = new Program(idl, programId, provider);
 
-      const mint = web3.Keypair.generate(); // Generate a new mint address
-      const tokenAccount = web3.Keypair.generate(); // Generate a new token account
+      const mint = web3.Keypair.generate(); 
+      const tokenAccount = web3.Keypair.generate(); 
 
       await program.rpc.mintNft(
         name, 
@@ -164,6 +169,9 @@ const MintNFT = () => {
       ) : (
         <>
           <p>Wallet Connected: {walletAddress}</p>
+          <button onClick={disconnectWallet} className="btn-disconnect">
+            Disconnect Wallet
+          </button>
           <div className="form">
             <input
               type="text"
